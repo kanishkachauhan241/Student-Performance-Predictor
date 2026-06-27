@@ -1,4 +1,5 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # Load the dataset
 data = pd.read_csv("data/student_data.csv")
@@ -22,3 +23,21 @@ data.info()
 # Display statistical summary
 print("\n===== Statistical Summary =====")
 print(data.describe())
+
+# Scatter Plot
+plt.figure(figsize=(8,5))
+
+plt.scatter(
+    data["StudyHours"],
+    data["Marks"],
+    color="blue",
+    s=80
+)
+
+plt.title("Study Hours vs Marks", fontsize=16)
+plt.xlabel("Study Hours", fontsize=12)
+plt.ylabel("Marks", fontsize=12)
+
+plt.grid(True)
+
+plt.show()
