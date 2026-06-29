@@ -82,18 +82,40 @@ plt.show()
 
 from sklearn.model_selection import train_test_split
 
-# Split the dataset
-X_train, X_test, y_train, y_test = train_test_split(
-    X,
+# selecting features
+x = data[["StudyHours", "Attendance", "AssignmentsCompleted"]]
+
+# target column
+y = data["Marks"]
+
+print("\nFeatures")
+print(x.head())
+
+print("\nTarget")
+print(y.head())
+
+# split the data
+x_train, x_test, y_train, y_test = train_test_split(
+    x,
     y,
     test_size=0.2,
     random_state=42
 )
 
-print("\n===== Training Data Shape =====")
-print(X_train.shape)
-print(y_train.shape)
+print("\nTraining Data")
+print(x_train.head())
 
-print("\n===== Testing Data Shape =====")
-print(X_test.shape)
-print(y_test.shape)
+print("\nTesting Data")
+print(x_test.head())
+
+print("\nTraining Target")
+print(y_train.head())
+
+print("\nTesting Target")
+print(y_test.head())
+
+print("\nTraining Shape")
+print(x_train.shape)
+
+print("Testing Shape")
+print(x_test.shape)
