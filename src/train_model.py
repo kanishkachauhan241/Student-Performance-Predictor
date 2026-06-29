@@ -1,5 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+
 
 # Load the dataset
 data = pd.read_csv("data/student_data.csv")
@@ -48,6 +50,17 @@ print("✓ Data Types: Correct")
 print("✓ Dataset is ready for Machine Learning!")
 
 
+# Select features and target
+X = data[["StudyHours", "Attendance", "AssignmentsCompleted"]]
+y = data["Marks"]
+
+print("\n===== Features (X) =====")
+print(X.head())
+
+print("\n===== Target (y) =====")
+print(y.head())
+
+
 # Scatter Plot
 plt.figure(figsize=(8,5))
 
@@ -65,3 +78,22 @@ plt.ylabel("Marks", fontsize=12)
 plt.grid(True)
 
 plt.show()
+
+
+from sklearn.model_selection import train_test_split
+
+# Split the dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42
+)
+
+print("\n===== Training Data Shape =====")
+print(X_train.shape)
+print(y_train.shape)
+
+print("\n===== Testing Data Shape =====")
+print(X_test.shape)
+print(y_test.shape)
