@@ -1,6 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+
 from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
 
 
 # Load the dataset
@@ -119,3 +121,34 @@ print(x_train.shape)
 
 print("Testing Shape")
 print(x_test.shape)
+
+# create model
+model = LinearRegression()
+
+# train model
+model.fit(x_train, y_train)
+
+print("\nModel trained successfully!")
+
+# predict marks
+prediction = model.predict([[8, 95, 10]])
+
+print("\nPrediction")
+print("\nPredicted Marks:", round(prediction[0], 2))
+
+# sample student
+prediction = model.predict([[8, 95, 10]])
+
+# Predict on test data
+y_pred = model.predict(x_test)
+
+print("\nActual Marks")
+print(y_test)
+
+print("\nPredicted Marks")
+print(y_pred)
+
+print("\nActual vs Predicted")
+
+for actual, predicted in zip(y_test, y_pred):
+    print("Actual:", actual, "Predicted:", round(predicted, 2))
