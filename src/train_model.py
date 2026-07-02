@@ -167,3 +167,20 @@ print("MAE:", mae)
 print("MSE:", mse)
 print("R2 Score:", r2)
 
+
+print("\nEnter Student Details")
+
+study_hours = float(input("Study Hours: "))
+attendance = float(input("Attendance: "))
+assignments = float(input("Assignments Completed: "))
+
+
+student = pd.DataFrame({
+    "StudyHours": [study_hours],
+    "Attendance": [attendance],
+    "AssignmentsCompleted": [assignments]
+})
+
+prediction = model.predict(student)
+
+print("\nPredicted Marks:", round(prediction[0], 2))
