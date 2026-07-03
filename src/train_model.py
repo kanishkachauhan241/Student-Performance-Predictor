@@ -183,4 +183,18 @@ student = pd.DataFrame({
 
 prediction = model.predict(student)
 
-print("\nPredicted Marks:", round(prediction[0], 2))
+marks = prediction[0]
+
+print("\nPredicted Marks:", round(marks, 2))
+
+
+if marks >= 90:
+    print("Performance: Excellent")
+elif marks >= 75:
+    print("Performance: Very Good")
+elif marks >= 60:
+    print("Performance: Good")
+elif marks >= 40:
+    print("Performance: Average")
+else:
+    print("Performance: Needs Improvement")
