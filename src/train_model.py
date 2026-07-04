@@ -1,5 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import joblib
+
 
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
@@ -131,14 +133,50 @@ model.fit(x_train, y_train)
 
 print("\nModel trained successfully!")
 
-# predict marks
-prediction = model.predict([[8, 95, 10]])
+# save model
+joblib.dump(model, "student_model.pkl")
 
-print("\nPrediction")
-print("\nPredicted Marks:", round(prediction[0], 2))
+print("Model saved")
+
+# load model
+loaded_model = joblib.load("student_model.pkl")
+print("Model loaded")
+
 
 # sample student
-prediction = model.predict([[8, 95, 10]])
+sample = pd.DataFrame({
+    "StudyHours": [8],
+    "Attendance": [95],
+    "AssignmentsCompleted": [10]
+})
+
+prediction = model.predict(sample) 
+
+print("\nPrediction")
+print("Predicted Marks:", round(prediction[0], 2))
+
+# prediction using loaded model
+prediction2 = loaded_model.predict(sample)
+
+print("\nPrediction from loaded model")
+print(round(prediction2[0], 2))
+
+print("\nEnter Student Details")
+
+study_hours = float(input("Study Hours: "))
+attendance = float(input("Attendance: "))
+assignments = float(input("Assignments Completed: "))
+
+# prediction for user input
+new_student = pd.DataFrame({
+    "StudyHours": [study_hours],
+    "Attendance": [attendance],
+    "AssignmentsCompleted": [assignments]
+})
+
+prediction = loaded_model.predict(new_student)
+
+print("\nPredicted Marks:", round(prediction[0], 2))
 
 # Predict on test data
 y_pred = model.predict(x_test)
@@ -153,8 +191,6 @@ print("\nActual vs Predicted")
 
 for actual, predicted in zip(y_test, y_pred):
     print("Actual:", actual, "Predicted:", round(predicted, 2))
-
-
 
 # Evaluate model
 # check model performance
