@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.pyc
+
+student_model.pkl
+prediction_history.csv

@@ -1,96 +1,46 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import joblib
+import os
 
-
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-
-# Load the dataset
+# Load dataset
 data = pd.read_csv("data/student_data.csv")
 
-# Display the first 5 rows
 print("===== First 5 Rows =====")
 print(data.head())
 
-# Display the shape of the dataset
 print("\n===== Dataset Shape =====")
 print(data.shape)
 
-# Display the column names
 print("\n===== Column Names =====")
 print(data.columns)
 
-# Display dataset information
 print("\n===== Dataset Information =====")
 data.info()
 
-# Display statistical summary
 print("\n===== Statistical Summary =====")
 print(data.describe())
 
-
-# Check for missing values
 print("\n===== Missing Values =====")
 print(data.isnull().sum())
 
-
-# Check for duplicate rows
 print("\n===== Duplicate Rows =====")
 print(data.duplicated().sum())
 
-
-# Check data types
 print("\n===== Data Types =====")
 print(data.dtypes)
 
-
-# Data Cleaning Report
 print("\n===== Data Cleaning Report =====")
-print("✓ Missing Values: None")
-print("✓ Duplicate Rows: None")
-print("✓ Data Types: Correct")
-print("✓ Dataset is ready for Machine Learning!")
+print("Missing Values: None")
+print("Duplicate Rows: None")
+print("Dataset is ready!")
 
-
-# Select features and target
-X = data[["StudyHours", "Attendance", "AssignmentsCompleted"]]
-y = data["Marks"]
-
-print("\n===== Features (X) =====")
-print(X.head())
-
-print("\n===== Target (y) =====")
-print(y.head())
-
-
-# Scatter Plot
-plt.figure(figsize=(8,5))
-
-plt.scatter(
-    data["StudyHours"],
-    data["Marks"],
-    color="blue",
-    s=80
-)
-
-plt.title("Study Hours vs Marks", fontsize=16)
-plt.xlabel("Study Hours", fontsize=12)
-plt.ylabel("Marks", fontsize=12)
-
-plt.grid(True)
-
-plt.show()
-
-
-from sklearn.model_selection import train_test_split
-
-# selecting features
+# Features and Target
 x = data[["StudyHours", "Attendance", "AssignmentsCompleted"]]
-
-# target column
 y = data["Marks"]
 
 print("\nFeatures")
@@ -99,7 +49,16 @@ print(x.head())
 print("\nTarget")
 print(y.head())
 
-# split the data
+# Visualization
+plt.figure(figsize=(8,5))
+plt.scatter(data["StudyHours"], data["Marks"])
+plt.title("Study Hours vs Marks")
+plt.xlabel("Study Hours")
+plt.ylabel("Marks")
+plt.grid(True)
+plt.show()
+
+# Split data
 x_train, x_test, y_train, y_test = train_test_split(
     x,
     y,
@@ -107,93 +66,47 @@ x_train, x_test, y_train, y_test = train_test_split(
     random_state=42
 )
 
-print("\nTraining Data")
-print(x_train.head())
-
-print("\nTesting Data")
-print(x_test.head())
-
-print("\nTraining Target")
-print(y_train.head())
-
-print("\nTesting Target")
-print(y_test.head())
-
 print("\nTraining Shape")
 print(x_train.shape)
 
 print("Testing Shape")
 print(x_test.shape)
 
-# create model
+# Train model
 model = LinearRegression()
 
-# train model
 model.fit(x_train, y_train)
 
 print("\nModel trained successfully!")
 
-# save model
+# Save model
 joblib.dump(model, "student_model.pkl")
-
 print("Model saved")
 
-# load model
+# Load model
 loaded_model = joblib.load("student_model.pkl")
 print("Model loaded")
 
-
-# sample student
+# Sample prediction
 sample = pd.DataFrame({
     "StudyHours": [8],
     "Attendance": [95],
     "AssignmentsCompleted": [10]
 })
 
-prediction = model.predict(sample) 
+sample_prediction = loaded_model.predict(sample)
 
-print("\nPrediction")
-print("Predicted Marks:", round(prediction[0], 2))
+print("\nSample Prediction")
+print("Predicted Marks:", round(sample_prediction[0], 2))
 
-# prediction using loaded model
-prediction2 = loaded_model.predict(sample)
-
-print("\nPrediction from loaded model")
-print(round(prediction2[0], 2))
-
-print("\nEnter Student Details")
-
-study_hours = float(input("Study Hours: "))
-attendance = float(input("Attendance: "))
-assignments = float(input("Assignments Completed: "))
-
-# prediction for user input
-new_student = pd.DataFrame({
-    "StudyHours": [study_hours],
-    "Attendance": [attendance],
-    "AssignmentsCompleted": [assignments]
-})
-
-prediction = loaded_model.predict(new_student)
-
-print("\nPredicted Marks:", round(prediction[0], 2))
-
-# Predict on test data
-y_pred = model.predict(x_test)
-
-print("\nActual Marks")
-print(y_test)
-
-print("\nPredicted Marks")
-print(y_pred)
+# Evaluate model
+y_pred = loaded_model.predict(x_test)
 
 print("\nActual vs Predicted")
 
 for actual, predicted in zip(y_test, y_pred):
     print("Actual:", actual, "Predicted:", round(predicted, 2))
 
-# Evaluate model
-# check model performance
 mae = mean_absolute_error(y_test, y_pred)
 mse = mean_squared_error(y_test, y_pred)
 r2 = r2_score(y_test, y_pred)
@@ -203,27 +116,26 @@ print("MAE:", mae)
 print("MSE:", mse)
 print("R2 Score:", r2)
 
-
+# User input
 print("\nEnter Student Details")
 
 study_hours = float(input("Study Hours: "))
 attendance = float(input("Attendance: "))
 assignments = float(input("Assignments Completed: "))
 
-
-student = pd.DataFrame({
+new_student = pd.DataFrame({
     "StudyHours": [study_hours],
     "Attendance": [attendance],
     "AssignmentsCompleted": [assignments]
 })
 
-prediction = model.predict(student)
+prediction = loaded_model.predict(new_student)
 
 marks = prediction[0]
 
 print("\nPredicted Marks:", round(marks, 2))
 
-
+# Performance
 if marks >= 90:
     print("Performance: Excellent")
 elif marks >= 75:
@@ -234,3 +146,26 @@ elif marks >= 40:
     print("Performance: Average")
 else:
     print("Performance: Needs Improvement")
+
+# Save prediction history
+history = pd.DataFrame({
+    "StudyHours": [study_hours],
+    "Attendance": [attendance],
+    "AssignmentsCompleted": [assignments],
+    "PredictedMarks": [round(marks, 2)]
+})
+
+if os.path.exists("prediction_history.csv"):
+    history.to_csv(
+        "prediction_history.csv",
+        mode="a",
+        header=False,
+        index=False
+    )
+else:
+    history.to_csv(
+        "prediction_history.csv",
+        index=False
+    )
+
+print("Prediction saved")
