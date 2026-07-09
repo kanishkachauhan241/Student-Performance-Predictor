@@ -2,9 +2,12 @@
 <html>
 <head>
     <title>Student Performance Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
 <body>
+    <div class="container">
+
 
     <h1>Student Performance Predictor</h1>
 
@@ -25,10 +28,16 @@
 
     {% if prediction %}
 
-        <h2>Predicted Marks: {{ prediction }}</h2>
-        <h3>Performance: {{ performance }}</h3>
+        <div class="result">
+
+              <h2>Predicted Marks: {{ prediction }}</h2>
+
+              <h2>Performance: {{ performance }}</h2>
+
+        </div>
 
     {% endif %}
+</div>    
 
 </body>
 </html>
