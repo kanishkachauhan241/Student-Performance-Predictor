@@ -13,6 +13,7 @@ def home():
 
     prediction = None
     performance = None
+    error = None
 
     if request.method == "POST":
 
@@ -20,33 +21,44 @@ def home():
         attendance = float(request.form["attendance"])
         assignments = float(request.form["assignments"])
 
-        student = pd.DataFrame({
-            "StudyHours": [study_hours],
-            "Attendance": [attendance],
-            "AssignmentsCompleted": [assignments]
-        })
+        if study_hours < 0 or study_hours > 24:
+            error = "Study hours must be between 0 and 24."
 
-        marks = model.predict(student)[0]
+        elif attendance < 0 or attendance > 100:
+            error = "Attendance must be between 0 and 100."
 
-        prediction = round(marks, 2)
+        elif assignments < 0 or assignments > 20:
+            error = "Assignments must be between 0 and 20."
 
-        if marks >= 90:
-            performance = "Excellent"
-        elif marks >= 75:
-            performance = "Very Good"
-        elif marks >= 60:
-            performance = "Good"
-        elif marks >= 40:
-            performance = "Average"
-        else:
-            performance = "Needs Improvement"
+        if error is None:
+
+            student = pd.DataFrame({
+                "StudyHours": [study_hours],
+                "Attendance": [attendance],
+                "AssignmentsCompleted": [assignments]
+            })
+
+            marks = model.predict(student)[0]
+
+            prediction = round(marks, 2)
+
+            if marks >= 90:
+                performance = "Excellent"
+            elif marks >= 75:
+                performance = "Very Good"
+            elif marks >= 60:
+                performance = "Good"
+            elif marks >= 40:
+                performance = "Average"
+            else:
+                performance = "Needs Improvement"
 
     return render_template(
         "index.html",
         prediction=prediction,
-        performance=performance
+        performance=performance,
+        error=error
     )
-
 
 if __name__ == "__main__":
     app.run(debug=True)
