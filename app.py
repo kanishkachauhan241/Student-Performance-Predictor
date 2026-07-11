@@ -2,6 +2,8 @@ from flask import Flask, render_template, request
 import joblib
 import pandas as pd
 
+import os
+
 app = Flask(__name__)
 
 # Load the trained model
@@ -52,6 +54,27 @@ def home():
                 performance = "Average"
             else:
                 performance = "Needs Improvement"
+
+            history = pd.DataFrame({
+                "StudyHours": [study_hours],
+                "Attendance": [attendance],
+                "AssignmentsCompleted": [assignments],
+                "PredictedMarks": [prediction],
+                "Performance": [performance]
+            })
+
+            if os.path.exists("prediction_history.csv"):
+                history.to_csv(
+                    "prediction_history.csv",
+                    mode="a",
+                    header=False,
+                    index=False
+                )
+            else:
+                history.to_csv(
+                    "prediction_history.csv", 
+                    index=False
+                    )
 
     return render_template(
         "index.html",
