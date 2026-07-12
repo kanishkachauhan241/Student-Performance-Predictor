@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request
 import joblib
 import pandas as pd
-
+import matplotlib.pyplot as plt
 import os
 
 app = Flask(__name__)
@@ -43,7 +43,7 @@ def home():
 
             marks = model.predict(student)[0]
 
-            
+
             marks = max(0, min(marks, 100))
             prediction = round(marks, 2)
 
@@ -82,7 +82,25 @@ def home():
 
     if os.path.exists("prediction_history.csv"):
         history = pd.read_csv("prediction_history.csv")
-        history = history.tail(5).to_dict(orient="records")
+        #Last 5 predictions
+        recent = history.tail(5)
+
+        # create chart
+        plt.figure(figsize=(6, 4))
+        plt.plot(
+            recent.index,
+            recent["PredictedMarks"],
+            marker="o"
+        )
+        plt.title("Recent Predicted Marks")
+        plt.xlabel("Prediction Number")
+        plt.ylabel("Marks")
+        plt.grid(True)
+
+        plt.savefig("static/images/prediction_chart.png")
+        plt.close()
+
+        history = recent.to_dict(orient="records")
 
 
 
@@ -94,5 +112,26 @@ def home():
         history=history
     )
 
+
+
+@app.route("/clear_history", methods=["POST"])
+def clear_history():
+
+    if os.path.exists("prediction_history.csv"):
+        os.remove("prediction_history.csv")
+
+    if os.path.exists("static/images/prediction_chart.png"):
+        os.remove("static/images/prediction_chart.png")
+
+    return render_template(
+        "index.html",
+        prediction=None,
+        performance=None,
+        error=None,
+        history=[]
+    )
+
+
 if __name__ == "__main__":
     app.run(debug=True)
+

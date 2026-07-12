@@ -62,7 +62,7 @@
 
     {% endif %}
 
-    {% if history %}
+{% if history %}
 
 <h2>Previous Predictions</h2>
 
@@ -90,7 +90,22 @@
 
 </table>
 
-{% endif %}
+<h2>Prediction Trend</h2>
+
+<img
+    src="{{ url_for('static', filename='images/prediction_chart.png') }}"
+    alt="Prediction Chart"
+    width="100%">
+
+    {% endif %}
+
+    <form action="/clear_history" method="POST">
+    <button type="submit" class="clear-btn">
+        Clear Prediction History
+    </button>
+</form>
+
+
 
 
 </div>    
