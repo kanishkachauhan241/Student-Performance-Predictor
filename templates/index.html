@@ -17,7 +17,7 @@
 <input
     type="number"
     name="study_hours"
-    step="0.1"vjh
+    step="0.1"
     placeholder="Enter study hours"
     required
 ><br><br>
@@ -61,6 +61,38 @@
         </div>
 
     {% endif %}
+
+    {% if history %}
+
+<h2>Previous Predictions</h2>
+
+<table class="history-table">
+
+    <tr>
+        <th>Study Hours</th>
+        <th>Attendance</th>
+        <th>Assignments</th>
+        <th>Marks</th>
+        <th>Performance</th>
+    </tr>
+
+    {% for row in history %}
+
+    <tr>
+        <td>{{ row.StudyHours }}</td>
+        <td>{{ row.Attendance }}</td>
+        <td>{{ row.AssignmentsCompleted }}</td>
+        <td>{{ row.PredictedMarks }}</td>
+        <td>{{ row.Performance }}</td>
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+{% endif %}
+
+
 </div>    
 
 </body>

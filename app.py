@@ -13,9 +13,10 @@ model = joblib.load("student_model.pkl")
 @app.route("/", methods=["GET", "POST"])
 def home():
 
-    prediction = None
-    performance = None
-    error = None
+    prediction =None
+    performance =None
+    error =None
+    history=[]
 
     if request.method == "POST":
 
@@ -42,6 +43,8 @@ def home():
 
             marks = model.predict(student)[0]
 
+            
+            marks = max(0, min(marks, 100))
             prediction = round(marks, 2)
 
             if marks >= 90:
@@ -74,13 +77,21 @@ def home():
                 history.to_csv(
                     "prediction_history.csv", 
                     index=False
-                    )
+                )
+
+
+    if os.path.exists("prediction_history.csv"):
+        history = pd.read_csv("prediction_history.csv")
+        history = history.tail(5).to_dict(orient="records")
+
+
 
     return render_template(
         "index.html",
         prediction=prediction,
         performance=performance,
-        error=error
+        error=error,
+        history=history
     )
 
 if __name__ == "__main__":
