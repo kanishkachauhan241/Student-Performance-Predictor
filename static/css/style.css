@@ -95,3 +95,31 @@ button:hover{
     background:#b02a37;
 }
 
+.stats{
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+    margin:25px 0;
+}
+
+.card{
+    flex:1;
+    background:#007BFF;
+    color:white;
+    text-align:center;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 3px 10px rgba(0,0,0,.15);
+}
+
+.card h3{
+    margin:0;
+    font-size:18px;
+}
+
+.card p{
+    margin-top:12px;
+    font-size:28px;
+    font-weight:bold;
+}
+

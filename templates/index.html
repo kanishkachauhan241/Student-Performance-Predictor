@@ -64,6 +64,25 @@
 
 {% if history %}
 
+<div class="stats">
+
+    <div class="card">
+        <h3>Total Predictions</h3>
+        <p>{{ total_predictions }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Highest Marks</h3>
+        <p>{{ highest_marks }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Average Marks</h3>
+        <p>{{ average_marks }}</p>
+    </div>
+
+</div>
+
 <h2>Previous Predictions</h2>
 
 <table class="history-table">
@@ -97,19 +116,15 @@
     alt="Prediction Chart"
     width="100%">
 
-    {% endif %}
-
-    <form action="/clear_history" method="POST">
+<form action="/clear_history" method="POST">
     <button type="submit" class="clear-btn">
         Clear Prediction History
     </button>
 </form>
 
+{% endif %}
 
-
-
-</div>    
+</div>
 
 </body>
 </html>
-
