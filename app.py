@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_file
 import joblib
 import pandas as pd
 import matplotlib
@@ -157,6 +157,17 @@ def clear_history():
         highest_marks=0,
         average_marks=0
     )
+
+@app.route("/download_history")
+def download_history():
+
+    if os.path.exists("prediction_history.csv"):
+        return send_file(
+            "prediction_history.csv",
+            as_attachment=True
+        )
+
+    return "No history available."
 
 
 if __name__ == "__main__":
