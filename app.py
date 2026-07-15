@@ -29,32 +29,40 @@ def home():
     error = None
     history = []
 
+    study_hours = ""
+    attendance = ""
+    assignments = ""
+
     total_predictions = 0
     highest_marks = 0
     average_marks = 0
 
     if request.method == "POST":
 
-        study_hours = float(request.form["study_hours"])
-        attendance = float(request.form["attendance"])
-        assignments = float(request.form["assignments"])
+        study_hours = request.form["study_hours"]
+        attendance = request.form["attendance"]
+        assignments = request.form["assignments"]
+
+        study_hours_float = float(study_hours)
+        attendance_float = float(attendance)
+        assignments_float = float(assignments)
 
         # Input validation
-        if study_hours < 0 or study_hours > 24:
+        if study_hours_float < 0 or study_hours_float > 24:
             error = "Study hours must be between 0 and 24."
 
-        elif attendance < 0 or attendance > 100:
+        elif attendance_float < 0 or attendance_float > 100:
             error = "Attendance must be between 0 and 100."
 
-        elif assignments < 0 or assignments > 20:
+        elif assignments_float < 0 or assignments_float > 20:
             error = "Assignments must be between 0 and 20."
 
         if error is None:
 
             student = pd.DataFrame({
-                "StudyHours": [study_hours],
-                "Attendance": [attendance],
-                "AssignmentsCompleted": [assignments]
+                "StudyHours": [study_hours_float],
+                "Attendance": [attendance_float],
+                "AssignmentsCompleted": [assignments_float]
             })
 
             marks = model.predict(student)[0]
@@ -129,14 +137,17 @@ def home():
         history = recent.to_dict(orient="records")
 
     return render_template(
-        "index.html",
-        prediction=prediction,
-        performance=performance,
-        error=error,
-        history=history,
-        total_predictions=total_predictions,
-        highest_marks=highest_marks,
-        average_marks=average_marks
+          "index.html",
+            prediction=prediction,
+            performance=performance,
+            error=error,
+            history=history,
+            total_predictions=total_predictions,
+            highest_marks=highest_marks,
+            average_marks=average_marks,
+            study_hours=study_hours,
+            attendance=attendance,
+            assignments=assignments
     )
 @app.route("/clear_history", methods=["POST"])
 def clear_history():
@@ -155,7 +166,10 @@ def clear_history():
         history=[],
         total_predictions=0,
         highest_marks=0,
-        average_marks=0
+        average_marks=0,
+        study_hours="",
+        attendance="",
+        assignments=""
     )
 
 @app.route("/download_history")

@@ -6,41 +6,48 @@
 </head>
 
 <body>
-    <div class="container">
 
+<div class="container">
 
     <h1>Student Performance Predictor</h1>
 
     <form method="POST">
 
-       <label>Study Hours</label><br>
-<input
-    type="number"
-    name="study_hours"
-    step="0.1"
-    placeholder="Enter study hours"
-    required
-><br><br>
+        <label>Study Hours</label><br>
+        <input
+            type="number"
+            name="study_hours"
+            step="0.1"
+            placeholder="Enter study hours"
+            value="{{ study_hours }}"
+            required
+        ><br><br>
 
-<label>Attendance</label><br>
-<input
-    type="number"
-    name="attendance"
-    step="0.1"
-    placeholder="Attendance (%)"
-    required
-><br><br>
+        <label>Attendance</label><br>
+        <input
+            type="number"
+            name="attendance"
+            step="0.1"
+            placeholder="Attendance (%)"
+            value="{{ attendance }}"
+            required
+        ><br><br>
 
-<label>Assignments Completed</label><br>
-<input
-    type="number"
-    name="assignments"
-    step="1"
-    placeholder="Assignments Completed"
-    required
-><br><br>
+        <label>Assignments Completed</label><br>
+        <input
+            type="number"
+            name="assignments"
+            step="1"
+            placeholder="Assignments Completed"
+            value="{{ assignments }}"
+            required
+        ><br><br>
 
-        <button type="submit">Predict</button>
+        <button
+            type="submit"
+            onclick="this.disabled=true; this.innerHTML='Predicting...'; this.form.submit();">
+            Predict
+        </button>
 
     </form>
 
@@ -51,83 +58,96 @@
     {% endif %}
 
     {% if prediction %}
-
-        <div class="result">
-
-              <h2>Predicted Marks: {{ prediction }}</h2>
-
-              <h2>Performance: {{ performance }}</h2>
-
-        </div>
-
+    <div class="result">
+        <h2>Predicted Marks: {{ prediction }}</h2>
+        <h2>
+        Performance:
+        <span class="
+        {% if performance == 'Excellent' %}
+        excellent
+        {% elif performance == 'Very Good' %}
+        verygood
+        {% elif performance == 'Good' %}
+        good
+        {% elif performance == 'Average' %}
+        average
+        {% else %}
+        poor
+        {% endif %}
+        ">
+        {{ performance }}
+        </span>
+        </h2>
+    </div>
     {% endif %}
 
-{% if history %}
+    {% if history %}
 
-<div class="stats">
+    <div class="stats">
 
-    <div class="card">
-        <h3>Total Predictions</h3>
-        <p>{{ total_predictions }}</p>
+        <div class="card">
+            <h3>Total Predictions</h3>
+            <p>{{ total_predictions }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Highest Marks</h3>
+            <p>{{ highest_marks }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Average Marks</h3>
+            <p>{{ average_marks }}</p>
+        </div>
+
     </div>
 
-    <div class="card">
-        <h3>Highest Marks</h3>
-        <p>{{ highest_marks }}</p>
-    </div>
+    <h2>Previous Predictions</h2>
 
-    <div class="card">
-        <h3>Average Marks</h3>
-        <p>{{ average_marks }}</p>
-    </div>
+    <table class="history-table">
 
-</div>
+        <tr>
+            <th>Study Hours</th>
+            <th>Attendance</th>
+            <th>Assignments</th>
+            <th>Marks</th>
+            <th>Performance</th>
+        </tr>
 
-<h2>Previous Predictions</h2>
+        {% for row in history %}
 
-<table class="history-table">
+        <tr>
+            <td>{{ row.StudyHours }}</td>
+            <td>{{ row.Attendance }}</td>
+            <td>{{ row.AssignmentsCompleted }}</td>
+            <td>{{ row.PredictedMarks }}</td>
+            <td>{{ row.Performance }}</td>
+        </tr>
 
-    <tr>
-        <th>Study Hours</th>
-        <th>Attendance</th>
-        <th>Assignments</th>
-        <th>Marks</th>
-        <th>Performance</th>
-    </tr>
+        {% endfor %}
 
-    {% for row in history %}
+    </table>
 
-    <tr>
-        <td>{{ row.StudyHours }}</td>
-        <td>{{ row.Attendance }}</td>
-        <td>{{ row.AssignmentsCompleted }}</td>
-        <td>{{ row.PredictedMarks }}</td>
-        <td>{{ row.Performance }}</td>
-    </tr>
+    <h2>Prediction Trend</h2>
 
-    {% endfor %}
+    <img
+        src="{{ url_for('static', filename='images/prediction_chart.png') }}"
+        alt="Prediction Chart"
+        class="chart">
 
-</table>
+    <form action="/clear_history" method="POST">
+        <button type="submit" class="clear-btn">
+            Clear Prediction History
+        </button>
+    </form>
 
-<h2>Prediction Trend</h2>
+    <a href="/download_history">
+        <button type="button" class="download-btn">
+            Download History
+        </button>
+    </a>
 
-<img
-    src="{{ url_for('static', filename='images/prediction_chart.png') }}"
-    alt="Prediction Chart"
-    width="100%">
-
-<form action="/clear_history" method="POST">
-    <button type="submit" class="clear-btn">
-        Clear Prediction History
-    </button>
-</form>
-<a href="/download_history">
-    <button type="button" class="download-btn">
-        Download History
-    </button>
-</a>
-
-{% endif %}
+    {% endif %}
 
 </div>
 
