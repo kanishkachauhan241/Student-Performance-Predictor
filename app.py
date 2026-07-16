@@ -118,11 +118,17 @@ def home():
         recent = history_df.tail(5)
 
         # Generate chart
-        plt.figure(figsize=(6, 4))
         plt.plot(
-            range(1, len(recent) + 1),
+            range(1, len(recent)+1),
             recent["PredictedMarks"],
-            marker="o"
+            marker="o",
+            linewidth=2
+        )
+
+        plt.fill_between(
+            range(1, len(recent)+1),
+            recent["PredictedMarks"],
+            alpha=0.2
         )
         plt.title("Recent Predicted Marks")
         plt.xlabel("Recent Predictions")
