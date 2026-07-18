@@ -10,6 +10,17 @@
 <div class="container">
 <div class="header">
     <h1>🎓 Student Performance Predictor</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
     <p>Predict student marks using Machine Learning</p>
 </div>
 

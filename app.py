@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, flash
 import joblib
 import pandas as pd
 import matplotlib
@@ -15,6 +15,7 @@ average_marks = 0
 
 
 app = Flask(__name__)
+app.secret_key = "student_performance_secret"
 
 # Load the trained model
 model = joblib.load("student_model.pkl")
@@ -110,6 +111,7 @@ def home():
                     "prediction_history.csv",
                     index=False
                 )
+            flash("Prediction saved successfully!", "success")    
 
     # Read history and generate dashboard
     if os.path.exists("prediction_history.csv"):
