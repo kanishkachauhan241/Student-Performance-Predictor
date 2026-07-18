@@ -6,6 +6,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import os
 
+from datetime import datetime
+
 
 total_predictions = 0
 highest_marks = 0
@@ -84,13 +86,16 @@ def home():
             else:
                 performance = "Needs Improvement"
 
+            current_time = datetime.now().strftime("%d-%m-%Y %H:%M:%S")        
+
             # Save prediction
             new_prediction = pd.DataFrame({
+                "Timestamp": [current_time],
                 "StudyHours": [study_hours],
                 "Attendance": [attendance],
                 "AssignmentsCompleted": [assignments],
                 "PredictedMarks": [prediction],
-                "Performance": [performance]
+                "Performance": [performance],
             })
 
             if os.path.exists("prediction_history.csv"):

@@ -192,4 +192,7 @@ button[type="submit"]:hover{
     margin-top:-10px;
     font-size:15px;
 }
+.history-table td:first-child{
+    font-size:13px;
+}
 

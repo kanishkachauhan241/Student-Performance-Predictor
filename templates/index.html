@@ -111,6 +111,7 @@
     <table class="history-table">
 
         <tr>
+            <th>Time</th>
             <th>Study Hours</th>
             <th>Attendance</th>
             <th>Assignments</th>
@@ -121,6 +122,7 @@
         {% for row in history %}
 
         <tr>
+            <td>{{ row.Timestamp }}</td>
             <td>{{ row.StudyHours }}</td>
             <td>{{ row.Attendance }}</td>
             <td>{{ row.AssignmentsCompleted }}</td>
