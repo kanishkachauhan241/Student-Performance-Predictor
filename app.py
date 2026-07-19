@@ -32,6 +32,9 @@ def home():
     error = None
     history = []
 
+    search = request.args.get("search", "")
+
+
     study_hours = ""
     attendance = ""
     assignments = ""
@@ -118,10 +121,18 @@ def home():
 
         history_df = pd.read_csv("prediction_history.csv")
 
+        if search:
+            history_df = history_df[
+                history_df.astype(str)
+                .apply(lambda row: row.str.contains(search, case=False).any(), axis=1)
+        ]
+
+
         total_predictions = len(history_df)
         highest_marks = round(history_df["PredictedMarks"].max(), 2)
         average_marks = round(history_df["PredictedMarks"].mean(), 2)
 
+        
         recent = history_df.tail(5)
 
         # Generate chart
@@ -160,7 +171,8 @@ def home():
             average_marks=average_marks,
             study_hours=study_hours,
             attendance=attendance,
-            assignments=assignments
+            assignments=assignments,
+            search=search
     )
 @app.route("/clear_history", methods=["POST"])
 def clear_history():
@@ -182,7 +194,8 @@ def clear_history():
         average_marks=0,
         study_hours="",
         attendance="",
-        assignments=""
+        assignments="",
+        search=""
     )
 
 @app.route("/download_history")
