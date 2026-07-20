@@ -1,3 +1,5 @@
+from tracemalloc import start
+
 from flask import Flask, render_template, request, send_file, flash
 import joblib
 import pandas as pd
@@ -5,6 +7,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import os
+import math
 
 from datetime import datetime
 
@@ -33,6 +36,8 @@ def home():
     history = []
 
     search = request.args.get("search", "")
+    page = request.args.get("page", 1, type=int)
+    per_page = 5
 
 
     study_hours = ""
@@ -133,7 +138,11 @@ def home():
         average_marks = round(history_df["PredictedMarks"].mean(), 2)
 
         
-        recent = history_df.tail(5)
+        start = (page - 1) * per_page
+        end = start + per_page
+
+        recent = history_df.iloc[start:end]
+        total_pages = math.ceil(len(history_df) / per_page)
 
         # Generate chart
         plt.plot(
@@ -172,7 +181,9 @@ def home():
             study_hours=study_hours,
             attendance=attendance,
             assignments=assignments,
-            search=search
+            search=search,
+            page=page,
+            total_pages=total_pages
     )
 @app.route("/clear_history", methods=["POST"])
 def clear_history():
@@ -195,7 +206,8 @@ def clear_history():
         study_hours="",
         attendance="",
         assignments="",
-        search=""
+        page=page,
+        total_pages=total_pages
     )
 
 @app.route("/download_history")

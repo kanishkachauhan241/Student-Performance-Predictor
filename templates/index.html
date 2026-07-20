@@ -161,6 +161,24 @@
 
     </table>
 
+    <div class="pagination">
+
+{% if page > 1 %}
+<a href="/?page={{ page-1 }}&search={{ search }}">
+    <button type="button">Previous</button>
+</a>
+{% endif %}
+
+<span>Page {{ page }} of {{ total_pages }}</span>
+
+{% if page < total_pages %}
+<a href="/?page={{ page+1 }}&search={{ search }}">
+    <button type="button">Next</button>
+</a>
+{% endif %}
+
+</div>
+
     <h2>Prediction Trend</h2>
 
     <img
