@@ -34,6 +34,9 @@ def home():
     performance = None
     error = None
     history = []
+    total=request.args.get("page",1,type=int)
+    per_page=5
+    total_pages=1
 
     search = request.args.get("search", "")
     page = request.args.get("page", 1, type=int)
@@ -98,7 +101,18 @@ def home():
             current_time = datetime.now().strftime("%d-%m-%Y %H:%M:%S")        
 
             # Save prediction
+
+            if os.path.exists("prediction_history.csv"):
+                old_history = pd.read_csv("prediction_history.csv")
+                new_id = len(old_history) + 1
+                header = False
+            else:
+                new_id = 1
+                header = True
+
+
             new_prediction = pd.DataFrame({
+                "ID":[new_id],
                 "Timestamp": [current_time],
                 "StudyHours": [study_hours],
                 "Attendance": [attendance],
@@ -107,18 +121,13 @@ def home():
                 "Performance": [performance],
             })
 
-            if os.path.exists("prediction_history.csv"):
-                new_prediction.to_csv(
-                    "prediction_history.csv",
-                    mode="a",
-                    header=False,
-                    index=False
-                )
-            else:
-                new_prediction.to_csv(
-                    "prediction_history.csv",
-                    index=False
-                )
+            new_prediction.to_csv(
+                "prediction_history.csv",
+                mode="a",
+                header=header,
+                index=False
+            )
+
             flash("Prediction saved successfully!", "success")    
 
     # Read history and generate dashboard
@@ -137,12 +146,13 @@ def home():
         highest_marks = round(history_df["PredictedMarks"].max(), 2)
         average_marks = round(history_df["PredictedMarks"].mean(), 2)
 
+
         
         start = (page - 1) * per_page
         end = start + per_page
 
         recent = history_df.iloc[start:end]
-        total_pages = math.ceil(len(history_df) / per_page)
+        total_pages = max(1, math.ceil(len(history_df) / per_page))
 
         # Generate chart
         plt.plot(
@@ -206,7 +216,7 @@ def clear_history():
         study_hours="",
         attendance="",
         assignments="",
-        page=page,
+        page=1,
         total_pages=total_pages
     )
 
