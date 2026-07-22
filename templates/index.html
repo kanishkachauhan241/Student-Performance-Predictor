@@ -127,6 +127,14 @@
             value="{{ search }}"
         >
 
+        <select name="sort">
+            <option value="">Sort By</option>
+            <option value="newest" {% if sort=="newest" %}selected{% endif %}>Newest First</option>
+            <option value="oldest"{% if sort=="oldest" %}selected{% endif %}>Oldest First</option>
+            <option value="highest" {% if sort=="highest" %}selected{% endif %}>Highest Marks</option>
+            <option value="lowest" {% if sort=="lowest" %}selected{% endif %}>Lowest Marks</option>
+        </select>
+
         <button type="submit">
             Search
         </button>
@@ -166,7 +174,7 @@
     <div class="pagination">
 
 {% if page > 1 %}
-<a href="/?page={{ page-1 }}&search={{ search }}">
+<a href="/?page={{ page-1 }}&search={{ search }}&sort={{ sort }}">
     <button type="button">Previous</button>
 </a>
 {% endif %}
@@ -174,7 +182,7 @@
 <span>Page {{ page }} of {{ total_pages }}</span>
 
 {% if page < total_pages %}
-<a href="/?page={{ page+1 }}&search={{ search }}">
+<a href="/?page={{ page+1 }}&search={{ search }}&sort={{ sort }}">
     <button type="button">Next</button>
 </a>
 {% endif %}

@@ -39,6 +39,7 @@ def home():
     total_pages=1
 
     search = request.args.get("search", "")
+    sort = request.args.get("sort", "")
     page = request.args.get("page", 1, type=int)
     per_page = 5
 
@@ -142,6 +143,15 @@ def home():
         ]
 
 
+        if sort == "newest":
+            history_df = history_df.sort_values("Timestamp", ascending=False)
+        elif sort == "oldest":
+            history_df = history_df.sort_values("Timestamp", ascending=True)
+        elif sort == "highest":
+            history_df = history_df.sort_values("PredictedMarks", ascending=False)
+        elif sort == "lowest":
+            history_df = history_df.sort_values("PredictedMarks", ascending=True)
+
         total_predictions = len(history_df)
         highest_marks = round(history_df["PredictedMarks"].max(), 2)
         average_marks = round(history_df["PredictedMarks"].mean(), 2)
@@ -192,6 +202,7 @@ def home():
             attendance=attendance,
             assignments=assignments,
             search=search,
+            sort=sort,
             page=page,
             total_pages=total_pages
     )
