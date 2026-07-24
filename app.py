@@ -40,6 +40,7 @@ def home():
 
     search = request.args.get("search", "")
     sort = request.args.get("sort", "")
+    performance_filter = request.args.get("performance_filter", "")
     page = request.args.get("page", 1, type=int)
     per_page = 5
 
@@ -143,6 +144,11 @@ def home():
         ]
 
 
+        if performance_filter:
+            history_df = history_df[
+                history_df["Performance"] == performance_filter
+            ]
+
         if sort == "newest":
             history_df = history_df.sort_values("Timestamp", ascending=False)
         elif sort == "oldest":
@@ -203,6 +209,7 @@ def home():
             assignments=assignments,
             search=search,
             sort=sort,
+            performance_filter=performance_filter,
             page=page,
             total_pages=total_pages
     )

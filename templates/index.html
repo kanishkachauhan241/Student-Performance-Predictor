@@ -135,6 +135,17 @@
             <option value="lowest" {% if sort=="lowest" %}selected{% endif %}>Lowest Marks</option>
         </select>
 
+        <label>Performance:</label>
+        <select name="performance_filter">
+            <option value="">All</option>
+            <option value="Excellent" {% if performance_filter=="Excellent" %}selected{% endif %}>Excellent</option>
+            <option value="Very Good" {% if performance_filter=="Very Good" %}selected{% endif %}>Very Good</option>
+            <option value="Good" {% if performance_filter=="Good" %}selected{% endif %}>Good</option>
+            <option value="Average" {% if performance_filter=="Average" %}selected{% endif %}>Average</option>
+            <option value="Needs Improvement" {% if performance_filter=="Needs Improvement" %}selected{% endif %}>Needs Improvement</option>
+
+        </select>
+
         <button type="submit">
             Search
         </button>
@@ -143,7 +154,9 @@
 
     <h2>Previous Predictions</h2>
 
+<div class="history-container">
     <table class="history-table">
+
 
         <tr>
             <th>ID</th>
@@ -164,17 +177,35 @@
             <td>{{ row.Attendance }}</td>
             <td>{{ row.AssignmentsCompleted }}</td>
             <td>{{ row.PredictedMarks }}</td>
-            <td>{{ row.Performance }}</td>
+            <td>
+                <span class="
+                {% if row.Performance == 'Excellent' %}
+                excellent
+                {% elif row.Performance == 'Very Good' %}
+                verygood
+                {% elif row.Performance == 'Good' %}
+                good
+                {% elif row.Performance == 'Average' %}
+                average
+                {% else %}
+                poor
+                {% endif %}
+                ">
+                {{ row.Performance }}
+                </span>
+            </td>
         </tr>
 
         {% endfor %}
 
     </table>
+</div>
+
 
     <div class="pagination">
 
 {% if page > 1 %}
-<a href="/?page={{ page-1 }}&search={{ search }}&sort={{ sort }}">
+<a href="/?page={{ page-1 }}&search={{ search }}&sort={{ sort }}&performance_filter={{ performance_filter }}">
     <button type="button">Previous</button>
 </a>
 {% endif %}
@@ -182,7 +213,7 @@
 <span>Page {{ page }} of {{ total_pages }}</span>
 
 {% if page < total_pages %}
-<a href="/?page={{ page+1 }}&search={{ search }}&sort={{ sort }}">
+<a href="/?page={{ page+1 }}&search={{ search }}&sort={{ sort }}&performance_filter={{ performance_filter }}">
     <button type="button">Next</button>
 </a>
 {% endif %}
