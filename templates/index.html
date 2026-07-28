@@ -171,12 +171,13 @@
         {% for row in history %}
 
         <tr>
-            <td>{{ row.ID }}</td>
-            <td>{{ row.Timestamp }}</td>
-            <td>{{ row.StudyHours }}</td>
-            <td>{{ row.Attendance }}</td>
-            <td>{{ row.AssignmentsCompleted }}</td>
-            <td>{{ row.PredictedMarks }}</td>
+            <td>{{ row.id }}</td>
+            <td>{{ row.timestamp }}</td>
+            <td>{{ row.study_hours }}</td>
+            <td>{{ row.attendance }}</td>
+            <td>{{ row.assignments }}</td>
+            <td>{{ row.predicted_marks }}</td>
+            <td>{{row.performance}}</td>
             <td>
                 <span class="
                 {% if row.Performance == 'Excellent' %}

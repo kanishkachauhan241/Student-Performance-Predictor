@@ -9,6 +9,13 @@ import matplotlib.pyplot as plt
 import os
 import math
 
+from database import(
+     get_connection,
+     create_table,
+     insert_prediction,
+     get_predictions
+)
+
 from datetime import datetime
 
 
@@ -19,6 +26,7 @@ average_marks = 0
 
 app = Flask(__name__)
 app.secret_key = "student_performance_secret"
+create_table()
 
 # Load the trained model
 model = joblib.load("student_model.pkl")
@@ -102,40 +110,22 @@ def home():
 
             current_time = datetime.now().strftime("%d-%m-%Y %H:%M:%S")        
 
-            # Save prediction
+            insert_prediction(
+                current_time,
+                study_hours_float,
+                attendance_float,
+                assignments_float,
+                prediction,
+                performance
+            ) 
 
-            if os.path.exists("prediction_history.csv"):
-                old_history = pd.read_csv("prediction_history.csv")
-                new_id = len(old_history) + 1
-                header = False
-            else:
-                new_id = 1
-                header = True
-
-
-            new_prediction = pd.DataFrame({
-                "ID":[new_id],
-                "Timestamp": [current_time],
-                "StudyHours": [study_hours],
-                "Attendance": [attendance],
-                "AssignmentsCompleted": [assignments],
-                "PredictedMarks": [prediction],
-                "Performance": [performance],
-            })
-
-            new_prediction.to_csv(
-                "prediction_history.csv",
-                mode="a",
-                header=header,
-                index=False
-            )
-
-            flash("Prediction saved successfully!", "success")    
+            flash("Prediction saved successfully!", "success")   
 
     # Read history and generate dashboard
-    if os.path.exists("prediction_history.csv"):
-
-        history_df = pd.read_csv("prediction_history.csv")
+        history=get_predictions()
+        history_df=pd.DataFrame(
+            [dict(row)for row in history]
+        )
 
         if search:
             history_df = history_df[
@@ -146,21 +136,21 @@ def home():
 
         if performance_filter:
             history_df = history_df[
-                history_df["Performance"] == performance_filter
+                history_df["performance"] == performance_filter
             ]
 
         if sort == "newest":
-            history_df = history_df.sort_values("Timestamp", ascending=False)
+            history_df = history_df.sort_values("timestamp", ascending=False)
         elif sort == "oldest":
-            history_df = history_df.sort_values("Timestamp", ascending=True)
+            history_df = history_df.sort_values("timestamp", ascending=True)
         elif sort == "highest":
-            history_df = history_df.sort_values("PredictedMarks", ascending=False)
+            history_df = history_df.sort_values("predicted_marks", ascending=False)
         elif sort == "lowest":
-            history_df = history_df.sort_values("PredictedMarks", ascending=True)
+            history_df = history_df.sort_values("predicted_marks", ascending=True)
 
         total_predictions = len(history_df)
-        highest_marks = round(history_df["PredictedMarks"].max(), 2)
-        average_marks = round(history_df["PredictedMarks"].mean(), 2)
+        highest_marks = round(history_df["predicted_marks"].max(), 2)
+        average_marks = round(history_df["predicted_marks"].mean(), 2)
 
 
         
@@ -173,14 +163,14 @@ def home():
         # Generate chart
         plt.plot(
             range(1, len(recent)+1),
-            recent["PredictedMarks"],
+            recent["predicted_marks"],
             marker="o",
             linewidth=2
         )
 
         plt.fill_between(
             range(1, len(recent)+1),
-            recent["PredictedMarks"],
+            recent["predicted_marks"],
             alpha=0.2
         )
         plt.title("Recent Predicted Marks")
@@ -213,14 +203,16 @@ def home():
             page=page,
             total_pages=total_pages
     )
-@app.route("/clear_history", methods=["POST"])
+@app.route("/clear_history",methods=["POST"])
 def clear_history():
-
-    if os.path.exists("prediction_history.csv"):
-        os.remove("prediction_history.csv")
-
+    conn=get_connection()
+    conn.execute("DELETE FROM predictions")
+    conn.commit()
+    conn.close()
     if os.path.exists("static/images/prediction_chart.png"):
         os.remove("static/images/prediction_chart.png")
+
+    flash("Prediction history cleared!","success")
 
     return render_template(
         "index.html",
@@ -235,7 +227,7 @@ def clear_history():
         attendance="",
         assignments="",
         page=1,
-        total_pages=total_pages
+        total_pages=1
     )
 
 @app.route("/download_history")
