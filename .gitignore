@@ -4,3 +4,4 @@ __pycache__/
 
 student_model.pkl
 prediction_history.csv
+student_predictions.db
