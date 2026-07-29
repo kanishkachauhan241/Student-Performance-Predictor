@@ -13,7 +13,10 @@ from database import(
      get_connection,
      create_table,
      insert_prediction,
-     get_predictions
+     get_predictions,
+     search_predictions,
+     get_predictions_paginated,
+     count_predictions
 )
 
 from datetime import datetime
@@ -122,10 +125,15 @@ def home():
             flash("Prediction saved successfully!", "success")   
 
     # Read history and generate dashboard
-        history=get_predictions()
-        history_df=pd.DataFrame(
-            [dict(row)for row in history]
+        history = get_predictions_paginated(
+            page,
+            per_page,
+            search,
+            sort,
+            performance_filter
         )
+
+        history_df = pd.DataFrame([dict(row) for row in history])
 
         if search:
             history_df = history_df[
@@ -148,7 +156,10 @@ def home():
         elif sort == "lowest":
             history_df = history_df.sort_values("predicted_marks", ascending=True)
 
-        total_predictions = len(history_df)
+        total_predictions = count_predictions(
+            search,
+            performance_filter
+        )
         highest_marks = round(history_df["predicted_marks"].max(), 2)
         average_marks = round(history_df["predicted_marks"].mean(), 2)
 

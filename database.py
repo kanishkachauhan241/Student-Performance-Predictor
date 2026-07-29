@@ -84,6 +84,126 @@ def get_predictions():
     return rows
 
 
+def search_predictions(search="", sort="newest", performance_filter=""):
+    conn = get_connection()
+    query = "SELECT * FROM predictions WHERE 1=1"
+    params = []
+
+    if search:
+        query += """
+        AND (
+            timestamp LIKE ?
+            OR study_hours LIKE ?
+            OR attendance LIKE ?
+            OR assignments LIKE ?
+            OR predicted_marks LIKE ?
+            OR performance LIKE ?
+        )
+        """
+
+        value = f"%{search}%"
+
+        params.extend([value, value, value, value, value, value])
+
+    if performance_filter:
+        query += " AND performance = ?"
+        params.append(performance_filter)
+
+    if sort == "newest":
+        query += " ORDER BY id DESC"
+
+    elif sort == "oldest":
+        query += " ORDER BY id ASC"
+
+    elif sort == "highest":
+        query += " ORDER BY predicted_marks DESC"
+
+    elif sort == "lowest":
+        query += " ORDER BY predicted_marks ASC"
+
+    rows = conn.execute(query, params).fetchall()
+
+    conn.close()
+
+    return rows
+
+
+def get_predictions_paginated(page, per_page, search="", sort="newest", performance_filter=""):
+    conn = get_connection()
+    query = "SELECT * FROM predictions WHERE 1=1"
+    params = []
+
+    if search:
+        query += """
+        AND (
+            timestamp LIKE ?
+            OR study_hours LIKE ?
+            OR attendance LIKE ?
+            OR assignments LIKE ?
+            OR predicted_marks LIKE ?
+            OR performance LIKE ?
+        )
+        """
+
+        value = f"%{search}%"
+        params.extend([value, value, value, value, value, value])
+
+    if performance_filter:
+        query += " AND performance = ?"
+        params.append(performance_filter)
+
+    if sort == "newest":
+        query += " ORDER BY id DESC"
+    elif sort == "oldest":
+        query += " ORDER BY id ASC"
+    elif sort == "highest":
+        query += " ORDER BY predicted_marks DESC"
+    elif sort == "lowest":
+        query += " ORDER BY predicted_marks ASC"
+
+    query += " LIMIT ? OFFSET ?"
+
+    params.append(per_page)
+    params.append((page - 1) * per_page)
+
+    rows = conn.execute(query, params).fetchall()
+
+    conn.close()
+
+    return rows
+
+
+def count_predictions(search="", performance_filter=""):
+    conn = get_connection()
+    query = "SELECT COUNT(*) FROM predictions WHERE 1=1"
+    params = []
+
+    if search:
+        query += """
+        AND (
+            timestamp LIKE ?
+            OR study_hours LIKE ?
+            OR attendance LIKE ?
+            OR assignments LIKE ?
+            OR predicted_marks LIKE ?
+            OR performance LIKE ?
+        )
+        """
+
+        value = f"%{search}%"
+        params.extend([value, value, value, value, value, value])
+
+    if performance_filter:
+        query += " AND performance = ?"
+        params.append(performance_filter)
+
+    total = conn.execute(query, params).fetchone()[0]
+
+    conn.close()
+
+    return total
+
+
 if __name__ == "__main__":
     create_table()
     print("Database created successfully.")
