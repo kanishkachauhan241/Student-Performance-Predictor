@@ -8,6 +8,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import os
 import math
+import io
 
 from database import(
      get_connection,
@@ -16,7 +17,8 @@ from database import(
      get_predictions,
      search_predictions,
      get_predictions_paginated,
-     count_predictions
+     count_predictions,
+     get_statistics
 )
 
 from datetime import datetime
@@ -160,8 +162,9 @@ def home():
             search,
             performance_filter
         )
-        highest_marks = round(history_df["predicted_marks"].max(), 2)
-        average_marks = round(history_df["predicted_marks"].mean(), 2)
+        stats=get_statistics()
+        highest_marks = round(stats["highest"]or 0, 2)
+        average_marks = round(stats["average"]or 0, 2)
 
 
         
@@ -243,14 +246,24 @@ def clear_history():
 
 @app.route("/download_history")
 def download_history():
+    history = get_predictions()
+    if not history:
+        return "No history available."
 
-    if os.path.exists("prediction_history.csv"):
-        return send_file(
-            "prediction_history.csv",
-            as_attachment=True
-        )
+    df = pd.DataFrame([dict(row) for row in history])
 
-    return "No history available."
+    output = io.StringIO()
+
+    df.to_csv(output, index=False)
+
+    output.seek(0)
+
+    return send_file(
+        io.BytesIO(output.getvalue().encode()),
+        mimetype="text/csv",
+        as_attachment=True,
+        download_name="prediction_history.csv"
+    )
 
 
 if __name__ == "__main__":

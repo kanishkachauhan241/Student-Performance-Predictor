@@ -203,6 +203,20 @@ def count_predictions(search="", performance_filter=""):
 
     return total
 
+def get_statistics():
+    conn = get_connection()
+    stats = conn.execute("""
+        SELECT
+            COUNT(*) AS total,
+            MAX(predicted_marks) AS highest,
+            AVG(predicted_marks) AS average
+        FROM predictions
+    """).fetchone()
+
+    conn.close()
+
+    return dict(stats)
+
 
 if __name__ == "__main__":
     create_table()
