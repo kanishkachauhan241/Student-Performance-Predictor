@@ -221,24 +221,32 @@
 
 </div>
 
-    <h2>Prediction Trend</h2>
 
-    <img
-        src="{{ url_for('static', filename='images/prediction_chart.png') }}"
-        alt="Prediction Chart"
-        class="chart">
+<h2>Prediction Trend</h2>
 
-    <form action="/clear_history" method="POST">
-        <button type="submit" class="clear-btn">
-            Clear Prediction History
-        </button>
-    </form>
+<img
+    src="{{ url_for('static', filename='images/prediction_chart.png') }}"
+    alt="Prediction Chart"
+    class="chart">
 
-    <a href="/download_history">
-        <button type="button" class="download-btn">
-            Download History
-        </button>
-    </a>
+<h2>Performance Distribution</h2>
+
+<img
+    src="{{ url_for('static', filename='images/performance_distribution.png') }}"
+    alt="Performance Distribution"
+    class="chart">
+
+<form action="/clear_history" method="POST">
+    <button type="submit" class="clear-btn">
+        Clear Prediction History
+    </button>
+</form>
+
+<a href="/download_history">
+    <button type="button" class="download-btn">
+        Download History
+    </button>
+</a>
 
     {% endif %}
 

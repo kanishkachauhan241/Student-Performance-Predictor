@@ -18,7 +18,8 @@ from database import(
      search_predictions,
      get_predictions_paginated,
      count_predictions,
-     get_statistics
+     get_statistics,
+     get_performance_distribution
 )
 
 from datetime import datetime
@@ -196,6 +197,21 @@ def home():
 
         plt.savefig("static/images/prediction_chart.png")
         plt.close()
+
+
+        distribution = get_performance_distribution()
+        labels = [row["performance"] for row in distribution]
+        counts = [row["total"] for row in distribution]
+
+        if labels:
+            plt.figure(figsize=(6,4))
+            plt.bar(labels, counts)
+            plt.title("Performance Distribution")
+            plt.xlabel("Performance")
+            plt.ylabel("Students")
+            plt.tight_layout()
+            plt.savefig("static/images/performance_distribution.png")
+            plt.close()
 
         history = recent.to_dict(orient="records")
 

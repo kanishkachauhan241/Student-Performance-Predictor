@@ -218,6 +218,21 @@ def get_statistics():
     return dict(stats)
 
 
+def get_performance_distribution():
+    conn = get_connection()
+    rows = conn.execute("""
+        SELECT
+            performance,
+            COUNT(*) AS total
+        FROM predictions
+        GROUP BY performance
+    """).fetchall()
+
+    conn.close()
+
+    return rows
+
+
 if __name__ == "__main__":
     create_table()
     print("Database created successfully.")
