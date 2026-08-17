@@ -1,4 +1,4 @@
-from tracemalloc import start
+﻿from tracemalloc import start
 
 from flask import Flask, render_template, request, send_file, flash
 import joblib
@@ -48,24 +48,21 @@ def home():
     performance = None
     error = None
     history = []
-    total=request.args.get("page",1,type=int)
+    # total=request.args.get("page",1,type=int)
     per_page=5
     total_pages=1
-
     search = request.args.get("search", "")
-    sort = request.args.get("sort", "")
+    sort = request.args.get("sort", "newest")
     performance_filter = request.args.get("performance_filter", "")
     page = request.args.get("page", 1, type=int)
     per_page = 5
-
-
     study_hours = ""
     attendance = ""
     assignments = ""
-
     total_predictions = 0
     highest_marks = 0
     average_marks = 0
+    date_filter = request.args.get("date_filter", "")
 
     if request.method == "POST":
 
@@ -128,92 +125,92 @@ def home():
             flash("Prediction saved successfully!", "success")   
 
     # Read history and generate dashboard
-        history = get_predictions_paginated(
-            page,
-            per_page,
-            search,
-            sort,
-            performance_filter
-        )
+    history = get_predictions_paginated(
+        page,
+        per_page,
+        search,
+        sort,
+        performance_filter
+    )
 
-        history_df = pd.DataFrame([dict(row) for row in history])
+    history_df = pd.DataFrame([dict(row) for row in history])
 
-        if search:
-            history_df = history_df[
-                history_df.astype(str)
-                .apply(lambda row: row.str.contains(search, case=False).any(), axis=1)
+    if search:
+        history_df = history_df[
+            history_df.astype(str)
+            .apply(lambda row: row.str.contains(search, case=False).any(), axis=1)
         ]
 
 
-        if performance_filter:
-            history_df = history_df[
-                history_df["performance"] == performance_filter
-            ]
+    if performance_filter:
+        history_df = history_df[
+            history_df["performance"] == performance_filter
+        ]
 
-        if sort == "newest":
-            history_df = history_df.sort_values("timestamp", ascending=False)
-        elif sort == "oldest":
-            history_df = history_df.sort_values("timestamp", ascending=True)
-        elif sort == "highest":
-            history_df = history_df.sort_values("predicted_marks", ascending=False)
-        elif sort == "lowest":
-            history_df = history_df.sort_values("predicted_marks", ascending=True)
+    if sort == "newest":
+        history_df = history_df.sort_values("timestamp", ascending=False)
+    elif sort == "oldest":
+        history_df = history_df.sort_values("timestamp", ascending=True)
+    elif sort == "highest":
+        history_df = history_df.sort_values("predicted_marks", ascending=False)
+    elif sort == "lowest":
+        history_df = history_df.sort_values("predicted_marks", ascending=True)
 
-        total_predictions = count_predictions(
-            search,
-            performance_filter
-        )
-        stats=get_statistics()
-        highest_marks = round(stats["highest"]or 0, 2)
-        average_marks = round(stats["average"]or 0, 2)
+    total_predictions = count_predictions(
+        search,
+        performance_filter
+    )
+    stats=get_statistics()
+    highest_marks = round(stats["highest"]or 0, 2)
+    average_marks = round(stats["average"]or 0, 2)
 
 
         
-        start = (page - 1) * per_page
-        end = start + per_page
+    start = (page - 1) * per_page
+    end = start + per_page
 
-        recent = history_df.iloc[start:end]
-        total_pages = max(1, math.ceil(len(history_df) / per_page))
+    recent = history_df.iloc[start:end]
+    total_pages = max(1, math.ceil(len(history_df) / per_page))
 
-        # Generate chart
-        plt.plot(
-            range(1, len(recent)+1),
-            recent["predicted_marks"],
-            marker="o",
-            linewidth=2
-        )
+    # Generate chart
+    plt.plot(
+        range(1, len(recent)+1),
+        recent["predicted_marks"],
+        marker="o",
+        linewidth=2
+    )
 
-        plt.fill_between(
-            range(1, len(recent)+1),
-            recent["predicted_marks"],
-            alpha=0.2
-        )
-        plt.title("Recent Predicted Marks")
-        plt.xlabel("Recent Predictions")
-        plt.ylabel("Marks")
-        plt.grid(True)
+    plt.fill_between(
+        range(1, len(recent)+1),
+        recent["predicted_marks"],
+        alpha=0.2
+    )
+    plt.title("Recent Predicted Marks")
+    plt.xlabel("Recent Predictions")
+    plt.ylabel("Marks")
+    plt.grid(True)
 
-        os.makedirs("static/images", exist_ok=True)
+    os.makedirs("static/images", exist_ok=True)
 
-        plt.savefig("static/images/prediction_chart.png")
+    plt.savefig("static/images/prediction_chart.png")
+    plt.close()
+
+
+    distribution = get_performance_distribution()
+    labels = [row["performance"] for row in distribution]
+    counts = [row["total"] for row in distribution]
+
+    if labels:
+        plt.figure(figsize=(6,4))
+        plt.bar(labels, counts)
+        plt.title("Performance Distribution")
+        plt.xlabel("Performance")
+        plt.ylabel("Students")
+        plt.tight_layout()
+        plt.savefig("static/images/performance_distribution.png")
         plt.close()
 
-
-        distribution = get_performance_distribution()
-        labels = [row["performance"] for row in distribution]
-        counts = [row["total"] for row in distribution]
-
-        if labels:
-            plt.figure(figsize=(6,4))
-            plt.bar(labels, counts)
-            plt.title("Performance Distribution")
-            plt.xlabel("Performance")
-            plt.ylabel("Students")
-            plt.tight_layout()
-            plt.savefig("static/images/performance_distribution.png")
-            plt.close()
-
-        history = recent.to_dict(orient="records")
+    history = recent.to_dict(orient="records")
 
     return render_template(
           "index.html",

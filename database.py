@@ -1,6 +1,7 @@
 import sqlite3
 
 DATABASE = "student_predictions.db"
+from datetime import datetime, timedelta
 
 import os
 def get_connection():
@@ -84,7 +85,13 @@ def get_predictions():
     return rows
 
 
-def search_predictions(search="", sort="newest", performance_filter=""):
+def search_predictions(
+        search="",
+        sort="newest",
+        performance_filter="",
+        date_filter=""
+):
+        
     conn = get_connection()
     query = "SELECT * FROM predictions WHERE 1=1"
     params = []
@@ -108,6 +115,24 @@ def search_predictions(search="", sort="newest", performance_filter=""):
     if performance_filter:
         query += " AND performance = ?"
         params.append(performance_filter)
+
+    if date_filter:
+        today = datetime.now()
+        if date_filter == "today":
+            date_string = today.strftime("%d-%m-%Y")
+            query += " AND timestamp LIKE ?"
+            params.append(f"{date_string}%")
+
+        elif date_filter == "7days":
+            cutoff = (today - timedelta(days=7)).strftime("%d-%m-%Y") 
+            query += " AND timestamp >= ?"
+            params.append(cutoff)
+
+        elif date_filter == "30days":      
+            cutoff = (today - timedelta(days=30)).strftime("%d-%m-%Y") 
+            query += " AND timestamp >= ?"
+            params.append(cutoff) 
+
 
     if sort == "newest":
         query += " ORDER BY id DESC"
@@ -128,7 +153,14 @@ def search_predictions(search="", sort="newest", performance_filter=""):
     return rows
 
 
-def get_predictions_paginated(page, per_page, search="", sort="newest", performance_filter=""):
+def get_predictions_paginated(
+        page,
+        per_page,
+        search="",
+        sort="newest",
+        performance_filter="",
+        date_filter=""
+):
     conn = get_connection()
     query = "SELECT * FROM predictions WHERE 1=1"
     params = []
@@ -151,6 +183,10 @@ def get_predictions_paginated(page, per_page, search="", sort="newest", performa
     if performance_filter:
         query += " AND performance = ?"
         params.append(performance_filter)
+    if date_filter=="today":
+        today = datetime.now().strftime("%d-%m-%Y")
+        query += " AND timestamp LIKE ?"
+        params.append(f"{today}%")     
 
     if sort == "newest":
         query += " ORDER BY id DESC"
@@ -160,6 +196,8 @@ def get_predictions_paginated(page, per_page, search="", sort="newest", performa
         query += " ORDER BY predicted_marks DESC"
     elif sort == "lowest":
         query += " ORDER BY predicted_marks ASC"
+    else:
+        query += " ORDER BY id DESC"    
 
     query += " LIMIT ? OFFSET ?"
 
@@ -173,11 +211,16 @@ def get_predictions_paginated(page, per_page, search="", sort="newest", performa
     return rows
 
 
-def count_predictions(search="", performance_filter=""):
+def count_predictions(
+    search="",
+    performance_filter="",
+    date_filter=""
+):
     conn = get_connection()
     query = "SELECT COUNT(*) FROM predictions WHERE 1=1"
     params = []
 
+    # Search filter
     if search:
         query += """
         AND (
@@ -189,20 +232,42 @@ def count_predictions(search="", performance_filter=""):
             OR performance LIKE ?
         )
         """
-
         value = f"%{search}%"
-        params.extend([value, value, value, value, value, value])
 
+        params.extend([
+            value,
+            value,
+            value,
+            value,
+            value,
+            value
+        ])
+    # Performance filter
     if performance_filter:
         query += " AND performance = ?"
         params.append(performance_filter)
 
-    total = conn.execute(query, params).fetchone()[0]
-
+    # Date filter
+    if date_filter:
+        today = datetime.now()
+        if date_filter == "today":
+            date_string = today.strftime("%d-%m-%Y")
+            query += " AND timestamp LIKE ?"
+            params.append(f"{date_string}%")
+        elif date_filter == "7days":
+            cutoff = today - timedelta(days=7)
+            query += " AND timestamp >= ?"
+            params.append(cutoff)
+        elif date_filter == "30days":
+            cutoff = today - timedelta(days=30)
+            query += " AND timestamp >= ?"
+            params.append(cutoff)
+    total = conn.execute(
+        query,
+        params
+    ).fetchone()[0]
     conn.close()
-
     return total
-
 def get_statistics():
     conn = get_connection()
     stats = conn.execute("""

@@ -146,6 +146,28 @@
 
         </select>
 
+        <label>Date:</label>
+
+        <select name="date_filter">
+
+            <option value="" {% if date_filter=="" %}selected{% endif %}>
+                All Time
+            </option>
+
+            <option value="today" {% if date_filter=="today" %}selected{% endif %}>
+                Today
+            </option>
+
+            <option value="7days" {% if date_filter=="7days" %}selected{% endif %}>
+                Last 7 Days
+            </option>
+
+            <option value="30days" {% if date_filter=="30days" %}selected{% endif %}>
+                Last 30 Days
+            </option>
+
+        </select>
+
         <button type="submit">
             Search
         </button>
@@ -177,22 +199,21 @@
             <td>{{ row.attendance }}</td>
             <td>{{ row.assignments }}</td>
             <td>{{ row.predicted_marks }}</td>
-            <td>{{row.performance}}</td>
             <td>
                 <span class="
-                {% if row.Performance == 'Excellent' %}
+                {% if row.performance == 'Excellent' %}
                 excellent
-                {% elif row.Performance == 'Very Good' %}
+                {% elif row.performance == 'Very Good' %}
                 verygood
-                {% elif row.Performance == 'Good' %}
+                {% elif row.performance == 'Good' %}
                 good
-                {% elif row.Performance == 'Average' %}
+                {% elif row.performance == 'Average' %}
                 average
                 {% else %}
                 poor
                 {% endif %}
                 ">
-                {{ row.Performance }}
+                {{ row.performance }}
                 </span>
             </td>
         </tr>
@@ -204,23 +225,20 @@
 
 
     <div class="pagination">
+        {% if page > 1 %}
+        <a href="/?page={{ page-1 }}&search={{ search }}&sort={{ sort }}&performance_filter={{ performance_filter }}&date_filter={{ date_filter }}">
+            <button type="button">Previous</button>
+        </a>
+        {% endif %}
+        <span>Page {{ page }} of {{ total_pages }}</span>
 
-{% if page > 1 %}
-<a href="/?page={{ page-1 }}&search={{ search }}&sort={{ sort }}&performance_filter={{ performance_filter }}">
-    <button type="button">Previous</button>
-</a>
-{% endif %}
-
-<span>Page {{ page }} of {{ total_pages }}</span>
-
-{% if page < total_pages %}
-<a href="/?page={{ page+1 }}&search={{ search }}&sort={{ sort }}&performance_filter={{ performance_filter }}">
-    <button type="button">Next</button>
-</a>
-{% endif %}
-
-</div>
-
+        {% if page < total_pages %}
+        <a href="/?page={{ page+1 }}&search={{ search }}&sort={{ sort }}&performance_filter={{ performance_filter }}&date_filter={{ date_filter }}">
+            <button type="button">Next</button>
+        </a>
+        {% endif %}
+    
+    </div>
 
 <h2>Prediction Trend</h2>
 
