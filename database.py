@@ -1,9 +1,10 @@
 import sqlite3
-
-DATABASE = "student_predictions.db"
 from datetime import datetime, timedelta
 
-import os
+
+DATABASE = "student_predictions.db"
+
+
 def get_connection():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
@@ -15,27 +16,18 @@ def create_table():
 
     conn.execute("""
     CREATE TABLE IF NOT EXISTS predictions (
-
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-
         timestamp TEXT,
-
         study_hours REAL,
-
         attendance REAL,
-
         assignments INTEGER,
-
         predicted_marks REAL,
-
         performance TEXT
-
     )
     """)
 
     conn.commit()
     conn.close()
-
 
 
 def insert_prediction(timestamp, study_hours, attendance,
@@ -63,25 +55,23 @@ def insert_prediction(timestamp, study_hours, attendance,
         predicted_marks,
         performance
     ))
-    conn.commit()
-    # cursor = conn.execute("SELECT COUNT(*) FROM predictions")
-    # print("Rows in database:", cursor.fetchone()[0])
 
+    conn.commit()
     conn.close()
 
 
 def get_predictions():
 
     conn = get_connection()
-    
+
     rows = conn.execute("""
         SELECT *
         FROM predictions
         ORDER BY id DESC
     """).fetchall()
-    
+
     conn.close()
-    
+
     return rows
 
 
@@ -91,12 +81,15 @@ def search_predictions(
         performance_filter="",
         date_filter=""
 ):
-        
+
     conn = get_connection()
+
     query = "SELECT * FROM predictions WHERE 1=1"
     params = []
 
+    # Search
     if search:
+
         query += """
         AND (
             timestamp LIKE ?
@@ -110,40 +103,82 @@ def search_predictions(
 
         value = f"%{search}%"
 
-        params.extend([value, value, value, value, value, value])
+        params.extend([
+            value,
+            value,
+            value,
+            value,
+            value,
+            value
+        ])
 
+    # Performance filter
     if performance_filter:
+
         query += " AND performance = ?"
         params.append(performance_filter)
 
+    # Date filter
+    
+    # Date filter
     if date_filter:
-        today = datetime.now()
+
+        today = datetime.now().date()
+
         if date_filter == "today":
+
             date_string = today.strftime("%d-%m-%Y")
+
             query += " AND timestamp LIKE ?"
             params.append(f"{date_string}%")
 
-        elif date_filter == "7days":
-            cutoff = (today - timedelta(days=7)).strftime("%d-%m-%Y") 
-            query += " AND timestamp >= ?"
-            params.append(cutoff)
+        elif date_filter in ("7days", "30days"):
 
-        elif date_filter == "30days":      
-            cutoff = (today - timedelta(days=30)).strftime("%d-%m-%Y") 
-            query += " AND timestamp >= ?"
-            params.append(cutoff) 
+            days = 7 if date_filter == "7days" else 30
+            cutoff = today - timedelta(days=days)
+
+            # Read timestamps and compare actual dates in Python
+            date_rows = conn.execute(
+                "SELECT id, timestamp FROM predictions"
+            ).fetchall()
+
+            valid_ids = []
+
+            for row in date_rows:
+                try:
+                    record_date = datetime.strptime(
+                        row["timestamp"][:10], "%d-%m-%Y"
+                    ).date()
+
+                    if cutoff <= record_date <= today:
+                        valid_ids.append(row["id"])
+
+                except (ValueError, TypeError):
+                    continue
+
+            if valid_ids:
+                placeholders = ",".join("?" for _ in valid_ids)
+                query += f" AND id IN ({placeholders})"
+                params.extend(valid_ids)
+            else:
+                query += " AND 1=0"
 
 
+    # Sorting
     if sort == "newest":
+
         query += " ORDER BY id DESC"
 
     elif sort == "oldest":
+
         query += " ORDER BY id ASC"
 
     elif sort == "highest":
+
         query += " ORDER BY predicted_marks DESC"
 
     elif sort == "lowest":
+
         query += " ORDER BY predicted_marks ASC"
 
     rows = conn.execute(query, params).fetchall()
@@ -161,11 +196,15 @@ def get_predictions_paginated(
         performance_filter="",
         date_filter=""
 ):
+
     conn = get_connection()
+
     query = "SELECT * FROM predictions WHERE 1=1"
     params = []
 
+    # Search
     if search:
+
         query += """
         AND (
             timestamp LIKE ?
@@ -178,27 +217,86 @@ def get_predictions_paginated(
         """
 
         value = f"%{search}%"
-        params.extend([value, value, value, value, value, value])
 
+        params.extend([
+            value,
+            value,
+            value,
+            value,
+            value,
+            value
+        ])
+
+    # Performance filter
     if performance_filter:
+
         query += " AND performance = ?"
         params.append(performance_filter)
-    if date_filter=="today":
-        today = datetime.now().strftime("%d-%m-%Y")
-        query += " AND timestamp LIKE ?"
-        params.append(f"{today}%")     
 
+    # Date filter
+    
+    # Date filter
+    if date_filter:
+
+        today = datetime.now().date()
+
+        if date_filter == "today":
+
+            date_string = today.strftime("%d-%m-%Y")
+
+            query += " AND timestamp LIKE ?"
+            params.append(f"{date_string}%")
+
+        elif date_filter in ("7days", "30days"):
+
+            days = 7 if date_filter == "7days" else 30
+            cutoff = today - timedelta(days=days)
+
+            # Find records within the selected date range
+            date_rows = conn.execute(
+                "SELECT id, timestamp FROM predictions"
+            ).fetchall()
+
+            valid_ids = []
+
+            for row in date_rows:
+                try:
+                    record_date = datetime.strptime(
+                        row["timestamp"][:10], "%d-%m-%Y"
+                    ).date()
+
+                    if cutoff <= record_date <= today:
+                        valid_ids.append(row["id"])
+
+                except (ValueError, TypeError):
+                    continue
+
+            if valid_ids:
+                placeholders = ",".join("?" for _ in valid_ids)
+                query += f" AND id IN ({placeholders})"
+                params.extend(valid_ids)
+            else:
+                query += " AND 1=0"
+
+
+    # Sorting
     if sort == "newest":
-        query += " ORDER BY id DESC"
-    elif sort == "oldest":
-        query += " ORDER BY id ASC"
-    elif sort == "highest":
-        query += " ORDER BY predicted_marks DESC"
-    elif sort == "lowest":
-        query += " ORDER BY predicted_marks ASC"
-    else:
-        query += " ORDER BY id DESC"    
 
+        query += " ORDER BY id DESC"
+
+    elif sort == "oldest":
+
+        query += " ORDER BY id ASC"
+
+    elif sort == "highest":
+
+        query += " ORDER BY predicted_marks DESC"
+
+    elif sort == "lowest":
+
+        query += " ORDER BY predicted_marks ASC"
+
+    # Pagination
     query += " LIMIT ? OFFSET ?"
 
     params.append(per_page)
@@ -212,16 +310,19 @@ def get_predictions_paginated(
 
 
 def count_predictions(
-    search="",
-    performance_filter="",
-    date_filter=""
+        search="",
+        performance_filter="",
+        date_filter=""
 ):
+
     conn = get_connection()
+
     query = "SELECT COUNT(*) FROM predictions WHERE 1=1"
     params = []
 
-    # Search filter
+    # Search
     if search:
+
         query += """
         AND (
             timestamp LIKE ?
@@ -232,6 +333,7 @@ def count_predictions(
             OR performance LIKE ?
         )
         """
+
         value = f"%{search}%"
 
         params.extend([
@@ -242,34 +344,70 @@ def count_predictions(
             value,
             value
         ])
+
     # Performance filter
     if performance_filter:
+
         query += " AND performance = ?"
         params.append(performance_filter)
 
     # Date filter
+    
+    # Date filter
     if date_filter:
-        today = datetime.now()
+
+        today = datetime.now().date()
+
         if date_filter == "today":
+
             date_string = today.strftime("%d-%m-%Y")
+
             query += " AND timestamp LIKE ?"
             params.append(f"{date_string}%")
-        elif date_filter == "7days":
-            cutoff = today - timedelta(days=7)
-            query += " AND timestamp >= ?"
-            params.append(cutoff)
-        elif date_filter == "30days":
-            cutoff = today - timedelta(days=30)
-            query += " AND timestamp >= ?"
-            params.append(cutoff)
-    total = conn.execute(
-        query,
-        params
-    ).fetchone()[0]
+
+        elif date_filter in ("7days", "30days"):
+
+            days = 7 if date_filter == "7days" else 30
+            cutoff = today - timedelta(days=days)
+
+            # Find records within the selected date range
+            date_rows = conn.execute(
+                "SELECT id, timestamp FROM predictions"
+            ).fetchall()
+
+            valid_ids = []
+
+            for row in date_rows:
+                try:
+                    record_date = datetime.strptime(
+                        row["timestamp"][:10], "%d-%m-%Y"
+                    ).date()
+
+                    if cutoff <= record_date <= today:
+                        valid_ids.append(row["id"])
+
+                except (ValueError, TypeError):
+                    continue
+
+            if valid_ids:
+                placeholders = ",".join("?" for _ in valid_ids)
+                query += f" AND id IN ({placeholders})"
+                params.extend(valid_ids)
+            else:
+                query += " AND 1=0"
+
+
+    total = conn.execute(query, params).fetchone()[0]
+
     conn.close()
+
     return total
+
+
 def get_statistics():
+
     conn = get_connection()
+
     stats = conn.execute("""
         SELECT
             COUNT(*) AS total,
@@ -284,7 +422,9 @@ def get_statistics():
 
 
 def get_performance_distribution():
+
     conn = get_connection()
+
     rows = conn.execute("""
         SELECT
             performance,
@@ -299,5 +439,7 @@ def get_performance_distribution():
 
 
 if __name__ == "__main__":
+
     create_table()
+
     print("Database created successfully.")
